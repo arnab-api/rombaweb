@@ -16,7 +16,7 @@ h2 {
   margin-bottom: 1.5rem;
   color: white;
   text-align: center;
-  background-color: #264d73;
+  background-color: #023205;
 }
 
 .nd-pageheader a, .nd-pageheader a.likelink {
@@ -28,7 +28,7 @@ h2 {
   margin-top: 1.5rem;
   padding: 1rem;
   text-align: center;
-  background-color: #264d73;
+  background-color: #023205;
 }
 
 .nd-pagefooter a {
@@ -85,8 +85,8 @@ h2 {
 figcaption {
   display: block;
   text-align: center;
-  font-size: 12px;
-  margin-top: 3px;
+  font-size: 17px;
+  margin-top: 12px;
 }
 
 .highlight {
