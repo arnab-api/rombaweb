@@ -111,7 +111,7 @@
                     <p style="text-align: justify;">
                         Mamba is a new foundational language model where the computational complexity grows
                         <i>linearly</i> with the
-                        input length and thus it can have a much larger context window and faster inference. It achives
+                        input length; thus it can have a much larger context window and faster inference. It achives
                         competitive
                         performance with similar sized transformer LMs, which is very promising. But, as these new LM
                         architectures
@@ -123,7 +123,7 @@
                     </p>
                     <p style="text-align: justify;">
                         We investigate these questions by trying to understand how Mamba recalls factual associations by
-                        applying techniques that has been sucesuful in transformers.
+                        applying techniques that has been successful in localizing and editing facts in transformer LMs.
                     </p>
                 </div><!--card-block-->
             </div><!--card-->
@@ -135,18 +135,23 @@
                 <figure>
                     <img src="images/Paper/mambablock.jpg" class="center_image" style="width: 45%;">
                     <figcaption>
-                        Architecture of a MambaBlock
+                        Architecture of a MambaBlock. W<sub>a</sub> and W<sub>g</sub> are up-projectors 2d × d matrices,
+                        while
+                        W<sub>o</sub> is
+                        a down projection matrix of size d × 2d.
                     </figcaption>
                 </figure>
 
                 <h2>Locating Facts with Activation Patching</h2>
 
                 <p style="text-align: justify;">
-                    some text
+                    To understand <b>where</b> Mamba stores factual associations, we apply activation patching.
+                    See the figure below and <a href="https://baulab.info/" target="_blank">rome.baulab.info</a> for
+                    details on this.
                 <figure>
                     <img src="images/Paper/mambablock.jpg" class="center_image" style="width: 55%;">
                     <figcaption>
-                        Architecture of a MambaBlock
+                        Architecture of a MambaBlock.
                     </figcaption>
                 </figure>
 

@@ -245,6 +245,24 @@ nobr.widenobr {
   margin-right: auto;
   width: 80%;
 }
+
+.supsub {
+  display: inline-block;
+}
+
+.supsub sup,
+.supsub sub {
+  position: relative;
+  display: block;
+  font-size: 0.7em;
+  line-height: 0.7;
+  font-style: italic;
+}
+
+.supsub sub {
+  top: .1em;
+}
+
 /* Trick for moving the media-control-panel down on chrome */
 /*
 video::-webkit-media-controls-panel {
