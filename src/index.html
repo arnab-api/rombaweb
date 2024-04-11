@@ -106,24 +106,28 @@
             </p>
 
             <div class="card" style="max-width: 1020px;">
-                <div class="card-block">
-                    <!-- <h3>How do Transformer LMs Decode Relations?</h3> -->
-                    <p style="text-align: justify;">
-                        Mamba is a new foundational language model where the computational complexity grows
-                        <i>linearly</i> with the
-                        input length; thus it can have a much larger context window and faster inference. It achives
-                        competitive
-                        performance with similar sized transformer LMs, which is very promising. But, as these new LM
-                        architectures
-                        continue to evolve, we must ask, <b>can we apply the tools/techniques designed to to analyze one
-                            type of neural
-                            architecture (transformers) to another (Mamba)?</b> Also, <b>to what extent our
-                            understanding of
-                            different mechanisms in transformers generalize to Mamba?</b>
+                <div class="card-block text-justify">
+                    <h3 class="text-center">How does Mamba store its knowledge?</h3>
+                    <p>
+                    <a href="https://github.com/state-spaces/mamba">Mamba</a>
+                        is a new RNN language model architecture inspried by
+                        <a href="https://arxiv.org/abs/2111.00396">state-space models</a>
+                        that combines the efficient training benefits of transformers
+                        with the efficient inference benefits of RNNs.
+                        It achieves competitive performance with an architecture
+                        that is very different from transformers.
                     </p>
-                    <p style="text-align: justify;">
-                        We investigate these questions by trying to understand how Mamba recalls factual associations by
-                        applying techniques that has been successful in localizing and editing facts in autoregressive
+                    <p>
+                        As neural architectures continue to evolve, we must ask,
+                        <b>can we apply the tools/techniques designed to to analyze one
+                        type of neural architecture (transformers) to another (Mamba)?</b>
+                        Also, <b>to what extentdoes  our understanding of
+                            mechanisms in transformers generalize to Mamba?</b>
+                    </p>
+                    <p>
+                        We investigate these questions by analyzing how Mamba recalls
+                        factual associations by applying techniques that has been
+                        successful in localizing and editing facts in autoregressive
                         transformer LMs.
                     </p>
                 </div><!--card-block-->
@@ -143,7 +147,7 @@
                     </figcaption>
                 </figure>
 
-                <h2>Locating Facts with Activation Patching</h2>
+                <h2>What does Activation Patching Reveal?</h2>
 
                 <p style="text-align: justify;">
                     To understand <b>where</b> Mamba stores factual associations, we apply activation patching
@@ -254,7 +258,7 @@
 
                 </p>
 
-                <h2>How About Attention-Knockout Experiments?</h2>
+                <h2>Can we study Attention in an Attention-Free Model?</h2>
 
                 <p style="text-align: justify;">
                     Path-dependent attention knockout experiments that have been successful in understanding factual
@@ -316,7 +320,7 @@
                 </figure>
 
 
-                <h2>Previous Work from Baulab</h2>
+                <h2>Previous Work</h2>
                 <p class="citation">
                     <a href="https://arxiv.org/pdf/2310.15916.pdf"><img src="images/related_works/rome.png"
                             alt="meng-2022">
