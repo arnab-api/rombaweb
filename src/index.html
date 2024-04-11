@@ -123,7 +123,8 @@
                     </p>
                     <p style="text-align: justify;">
                         We investigate these questions by trying to understand how Mamba recalls factual associations by
-                        applying techniques that has been successful in localizing and editing facts in transformer LMs.
+                        applying techniques that has been successful in localizing and editing facts in autoregressive
+                        transformer LMs.
                     </p>
                 </div><!--card-block-->
             </div><!--card-->
@@ -145,52 +146,245 @@
                 <h2>Locating Facts with Activation Patching</h2>
 
                 <p style="text-align: justify;">
-                    To understand <b>where</b> Mamba stores factual associations, we apply activation patching.
-                    See the figure below and <a href="https://baulab.info/" target="_blank">rome.baulab.info</a> for
-                    details on this.
+                    To understand <b>where</b> Mamba stores factual associations, we apply activation patching
+                    <b>(a)</b>. To estimate the contribution of different module-token states towards a correct factual
+                    prediction
+                    (<i>s = Michael Jordan, r = professionally played, o = basketball</i>)
+                    , we run the model 3 times --
+
+                <ol>
+                    <li>Clean Run, G: Run the model on a prompt to extract the fact we are interested in <i>x = (s, r) =
+                            Michael Jordan professionally played</i></li>
+                    <li>Corrupted Run, G<sup>*</sup>: Run the model with a different <i>s'</i> that changes the model
+                        output to <i>o'</i> (<i>o'</i> != o)</li>
+                    <li>Patched Run, G<sup>*</sup>[&larr; h<span class="supsub"><sup>l</sup><sub>i</sub></span> ]
+                        In the corrupted run G<sup>*</sup>, state h<span class="supsub"><sup>l</sup><sub>i</sub></span>
+                        is
+                        restored by patching its corresponding state from the clean run G. </li>
+                </ol>
+
+                In the patched run, we monitor to what extent the clean state h<span
+                    class="supsub"><sup>l</sup><sub>i</sub></span> recovers the original prediction <i>o</i>. And, we
+                call this recovery the <i>indirect effect</i> (IE) of the state
+                h<span class="supsub"><sup>l</sup><sub>i</sub></span> on the prediction <i>o</i> is recalling the fact
+                (<i>s, r, o</i>).
+
+                See and <a href="https://baulab.info/" target="_blank">rome.baulab.info</a> for
+                details on this.
                 <figure>
-                    <img src="images/Paper/mambablock.jpg" class="center_image" style="width: 55%;">
-                    <figcaption>
-                        Architecture of a MambaBlock.
-                    </figcaption>
+                    <img src="images/Paper/activation_patching.png" class="center_image" style="width: 95%;">
+                    <!-- <figcaption>
+                        Activation Patching.
+                    </figcaption> -->
                 </figure>
 
                 <p style="text-align: justify;">
-                    some more text
+                    When activation patching is applied on the residual states <b>(b)</b>, we observe 2 distinct regions
+                    of
+                    high IE.
+                <ol>
+                    <li><i>early site</i>: The early middle layers show high IE at the subject last token</li>
+                    <li><i>late site</i>: The late layers show high IE at the very last token of the prompt.</li>
+                </ol>
+
+                The high IE at the late site is natural as these LMs are autoregressive
+                restroring a late state would mean restoring most of the model computation. However, the <i>early
+                    site</i> is surprising and
+                suggests that the LM stores the fact in these states. This finding is consistent with what <a
+                    href="https://arxiv.org/pdf/2202.05262.pdf" target="_blank">Meng et al (2022)</a> observed in GPT
+                models.
+
                 </p>
+
+                <p style="text-align: justify;">
+                    We can apply activation patching to all the different types of states in MambaBlock,
+                    the Conv + SSM output s<sub>i</sub>,
+                    the gating output g<sub>i</sub>,
+                    and the MambaBlock output o<sub>i</sub>.
+                </p>
+
+                <figure>
+                    <img src="images/Paper/states_indirect_effects.png" class="center_image" style="width: 85%;">
+                    <!-- <figcaption>
+                        Activation Patching.
+                    </figcaption> -->
+                </figure>
 
                 <h2>Can ROME Edit Facts in Mamba?</h2>
 
                 <p style="text-align: justify;">
-                    some text
+                    <a href="https://rome.baulab.info/" target="_blank">ROME</a>, or Rank-One Model Editing was designed
+                    to edit/insert facts in
+                    GPT (or a autoregressive transformer LM). ROME views the down projection matrix W<sub>down</sub> of
+                    GPT as a associatetive memory mapping specific
+                    keys to specific values. And, ROME inserts a new fact (a new key-value pair) by directly adding a
+                    rank-one matrix to W<sub>down</sub>. Checkout <a href="https://rome.baulab.info/"
+                        target="_blank">rome.baulab.info</a>
+                    for details on this.
+                </p>
+
                 <figure>
-                    <img src="images/Paper/mambablock.jpg" class="center_image" style="width: 30%;">
+                    <img src="images/Paper/rome_performance.png" class="center_image" style="width: 100%;">
                     <figcaption>
-                        Architecture of a MambaBlock
+                        ROME performance by modifying different projection matrices W<sub>a</sub>, W<sub>g</sub>, and
+                        W<sub>o</sub> in MambaBlock.
                     </figcaption>
                 </figure>
 
                 <p style="text-align: justify;">
-                    some more text
+                    We apply ROME to all the 3 projection matrices in MambaBlocks across different layers and plot its
+                    performance in changing different facts. We use the same evaluation suite used by <a
+                        href="https://arxiv.org/pdf/2202.05262.pdf" target="_blank">Meng et al (2022)</a>.
+                    <i>Efficacy</i> (ES) score indicate if we can <i>make</i> the LM say say the new fact. But,
+                    <i>knowing</i> a fact
+                    differs from <i>making</i> the LM say it. To test for that ROME uses <i>Generalization</i> (PS)
+                    score indicates if the edited knowledge
+                    is robust to changes in wordings and context. And, <i>Specificity</i> (NS) ensures that the edit
+                    does not change unrelated facts; i.e. if after inserting that Michael Jordan played soccar, the LM
+                    should not map some other
+                    athlete (say Lebron James) to soccar as well. The final score S is a harmonic mean of ES, PS, and
+                    NS.
+                </p>
+
+                <p style="text-align: justify;">
+                    <b>We find that ROME can successfully edit facts in a range of layers in Mamba.</b> Modifying
+                    W<sub>a</sub> cannot achieve
+                    high specificity in early layers. And, W<sub>g</sub> becomes an unpredictable mediator after layer
+                    30. ROME achives the best performance by modifying W<sub>o</sub> projections.
+
                 </p>
 
                 <h2>How About Attention-Knockout Experiments?</h2>
 
                 <p style="text-align: justify;">
-                    some text
+                    Path-dependent attention knockout experiments that have been successful in understanding factual
+                    information flow in Transformer LMs (<a href="https://arxiv.org/pdf/2304.14767.pdf"
+                        target="_blank">Geva
+                        et al (2023)</a>).
+                    In these experiments, we block out the information that flows from the <i>q<sup>th</sup></i>
+                    token to the <i>k<sup>th</sup></i> token via a attention head and monitor the effect on some task.
+                    This can be achived in transformer LMs by directly modifying the attention matrix calculated by the
+                    head.
+                </p>
+
+                <p style="text-align: justify;">
+                    However, in Mamba, it is difficult to achive this due to certain architectural choices. See the
+                    figure below.
+                </p>
+
                 <figure>
-                    <img src="images/Paper/mambablock.jpg" class="center_image" style="width: 55%;">
+                    <img src="images/Paper/attn_knockout.png" class="center_image" style="width: 60%;">
                     <figcaption>
-                        Architecture of a MambaBlock
+                        Roll-out of Conv + SSM operation in MambaBlock. The SiLU non-linearity between Conv1D and SSM
+                        makes it difficult to
+                        calculate how much information c<sub>i</sub> retains from a<sub>i</sub>.
                     </figcaption>
                 </figure>
 
                 <p style="text-align: justify;">
-                    some more text
+                    However, we can block out information flow by mean-ablating the subject, subject-last, or other
+                    tokens to <i>all</i> the future tokens in different layers to understand Conv + SSM in which layers
+                    relay what information.
+
+                <ul>
+                    <li>The purple lines show that Mamba uses the Conv + SSM operation in early middle layers to relay
+                        information about the non-subject tokens. Blocking information from non-subject tokens in these
+                        layers can reduce the probability of the correct prediction <i>p(o)</i> by up to 50%.
+
+                    </li>
+                    <li>The green lines show that Mamba moves the subject information in 2 steps</li>
+                    <ul>
+                        <li>
+                            First, if the subject contains multiple tokens, the very early layers collate the
+                            information from all the subject tokens
+                            to the subject last token position.
+                        </li>
+                        <li>
+                            Second, Mamba uses the Conv + SSM paths in later layers (43 - 48) to propagate critical
+                            information about the subject to later tokens.
+                        </li>
+                    </ul>
+                </ul>
+
                 </p>
 
+                <figure>
+                    <img src="images/Paper/attn_knockout_results.png" class="center_image" style="width: 60%;">
+                    <figcaption>
+                        Results from blocking information flow about certain tokens to all the future tokens.
+                    </figcaption>
+                </figure>
 
-                <h2>How to cite</h2>
+
+                <h2>Previous Work from Baulab</h2>
+                <p class="citation">
+                    <a href="https://arxiv.org/pdf/2310.15916.pdf"><img src="images/related_works/rome.png"
+                            alt="meng-2022">
+                        Kevin Meng, David Bau, Alex Andonian, Yonatan Belinkov.
+                        <i>Locating and Editing Factual Associations in GPT</i> 2022.
+                    </a>
+                    <br>
+                    <b>Notes:</b> Applies <i>causal tracing</i> or activation patching on GPT models to understand
+                    critical states that mediate
+                    factual information. Introduces ROME to update/insert a single fact in the LM by directly modifying
+                    the down projection matrix of a MLP module.
+                </p>
+
+                <p class="citation">
+                    <a href="https://arxiv.org/pdf/2210.07229.pdf"><img src="images/related_works/mrome-update-crop.png"
+                            alt="meng-2023">
+                        Kevin Meng, Arnab Sen Sharma, Alex Andonian, Yonatan Belinkov, David Bau.
+                        <i>Mass-Editing Memory In a Transformer</i> 2023.
+                    </a>
+                    <br>
+                    <b>Notes:</b> Scales up ROME to edit thousands of facts in a autoregressive transformer LM by
+                    distributing the edit across a <i>range</i> of critical middle layers.
+                </p>
+
+                <p class="citation">
+                    <a href="https://arxiv.org/pdf/2210.07229.pdf"><img src="images/related_works/lre.png"
+                            alt="hernandez-2023">
+                        Evan Hernandez*, Arnab Sen Sharma*, Tal Haklay, Kevin Meng, Martin Wattenberg, Jacob Andreas,
+                        Yonatan Belinkov, David Bau.
+                        <i>Linearity of Relation Decoding in Transformer LMs</i> 2023.
+                    </a>
+                    <br>
+                    <b>Notes:</b> Shows that for a range of relations how the LM extracts relation specific information
+                    (decodes the relation)
+                    given a prompt <i>x = (s, r)</i> can approximated by a simple linear model. And, that linear model
+                    can be achived by taking a
+                    first order Taylor expansion of the LM computation itself.
+                </p>
+
+                <h2></h2>
+
+
+                <h2>Interpreting Mamba</h2>
+                <p class="citation">
+                    <a href="https://arxiv.org/abs/2403.01590"><img src="images/related_works/ali_et_al.png"
+                            alt="hernandez-2023">
+                        Ameen Ali, Itamar Zimerman, Lior Wolf
+                        <i>The Hidden Attention of Mamba Models</i> 2024.
+                    </a>
+                    <br>
+                    <b>Notes:</b> Shows that the information selective-SSM brings to the k<sup>th</sup> token state from
+                    the convolved
+                    q<sup>th</sup> token state can be calculated. And, this information can be visualized as a heatmap
+                    per channel (dim),
+                    resembling the attention maps in transformers.
+                </p>
+
+                <p class="citation">
+                    <a href="https://arxiv.org/abs/2404.05971"><img src="images/related_works/tuned_lens.png"
+                            alt="hernandez-2023">
+                        Gonçalo Paulo, Thomas Marshall, Nora Belrose
+                        <i>Does Transformer Interpretability Transfer to RNNs?</i> 2024.
+                    </a>
+                    <br>
+                    <b>Notes:</b> Finds that a set of selected interpretability tools designed for transformer LMs can
+                    be applied
+                    to SOTA RNN architectures such as Mamba, RWKV models "out-of-the-box".
+                </p>
 
                 <p>This work is not yet peer-reviewed. The preprint can be cited as follows.
                 </p>
